@@ -42,11 +42,11 @@ class Finder {
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             $output = curl_exec($ch);
             if(curl_errno($ch)) {
-                throw new Exception("Error cUrl: ".curl_errno($ch).") : Unable to access this page", 1);                
+                return json_encode(["error"=> "Error cUrl: ".curl_errno($ch)." : Unable to access this page"]);
             } else {
                 $html = str_get_html($output);
                 if ($html->getElementById('ul#journeelist') == null ){
-                    throw new Exception("Can't find match informations", 1);  
+                    return json_encode(["error"=> "Can't find match informations"]);
                 } else {
                     $allMatches = [];
                     foreach($html->find('div.round tr') as $row) {
@@ -106,19 +106,19 @@ class Finder {
                                                 'name' => 
                                                     $this->getCleanString(explode(" -  ", $row->find('td.eq p',0)->plaintext)[1]),
                                                 'score' => 
-                                                    intval($row->find('td.eq p',0)->find('strong',0)->plaintext ? $row->find('td.eq p',0)->find('strong',0)->plaintext : null)
+                                                    $row->find('td.eq p',0)->find('strong',0)->plaintext ? intval($row->find('td.eq p',0)->find('strong',0)->plaintext) : null
                                             ],
                                             'visitingTeam' => [
                                                 'name' => 
                                                     $this->getCleanString(explode(" -  ", $row->find('td.eq p',1)->plaintext)[1]),
                                                 'score' => 
-                                                    intval($row->find('td.eq p',1)->find('strong',0)->plaintext ? $row->find('td.eq p',1)->find('strong',0)->plaintext : null)
+                                                    $row->find('td.eq p',1)->find('strong',0)->plaintext ? intval($row->find('td.eq p',1)->find('strong',0)->plaintext) : null
                                             ],
                                             'referees' => [
                                                 1 => 
-                                                    count($fullReferees)-2 && $this->getCleanString($fullReferees[count($fullReferees)-2]) ?  $this->getCleanString($fullReferees[count($fullReferees)-2]) : null,
+                                                    count($fullReferees)-2 && $fullReferees[count($fullReferees)-2] && $fullReferees[count($fullReferees)-2] != "Aucun arbitre renseigné" ? $fullReferees[count($fullReferees)-2] : null,
                                                 2 => 
-                                                    count($fullReferees)-3 && $this->getCleanString($fullReferees[count($fullReferees)-3]) ?  $this->getCleanString($fullReferees[count($fullReferees)-3]) : null
+                                                    count($fullReferees)-3 && $fullReferees[count($fullReferees)-3] ? $fullReferees[count($fullReferees)-3] : null
                                             ],
                                             'address' => [
                                                 'street' => 
@@ -132,9 +132,9 @@ class Finder {
                                 }                
                             }                                        
                         }
-                        if (!$clubFound){
-                            throw new Exception("Can't find the string in matches list", 1);  
-                        } 
+                        // if (!$clubFound){
+                        //     return json_encode(["error"=> "Can't find the string in matches list"]);
+                        // } 
                     }
                     $html->clear();
                     curl_close($ch);  
