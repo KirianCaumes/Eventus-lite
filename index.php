@@ -49,9 +49,16 @@ class Finder {
                     return json_encode(["error"=> "Can't find match informations"]);
                 } else {
                     $allMatches = [];
+                    $teamInfos = [   
+                        //TODO optimize ?
+                        "championship" => 
+                            $html->find('div.sup h2 span', 0) ? $this->getCleanString($this->stripAccents($html->find('div.sup h2 span', 0)->plaintext)) : 'null'
+                        ];
                     foreach($html->find('div.round tr') as $row) {
                         if ( strpos( strtolower($row), strtolower($string) ) ){
-                            $teamInfos = [
+                            array_push($teamInfos, [
+                                "team" => 
+                                    $this->getCleanString($row->find('td.eq',0)->plaintext),      
                                 "position" => 
                                     intval($row->find('td.num',0)->plaintext),
                                 "points" => 
@@ -62,15 +69,17 @@ class Finder {
                                     intval($row->find('td',4)->plaintext),
                                 "draw" => 
                                     intval($row->find('td',5)->plaintext),
-                                "lose" => 
+                                "lost" => 
                                     intval($row->find('td',6)->plaintext),
-                                "butPlus" => 
-                                    intval($row->find('td',7)->plaintext),
-                                "butMinus" => 
-                                    intval($row->find('td',8)->plaintext),
-                                "diff" => 
-                                    intval($row->find('td',9)->plaintext)
-                            ];
+                                "goal" => [ 
+                                    "goalScored" => 
+                                        intval($row->find('td',7)->plaintext),
+                                    "goalTaken" => 
+                                        intval($row->find('td',8)->plaintext),
+                                    "goalDifference" => 
+                                        intval($row->find('td',9)->plaintext)
+                                ]                               
+                            ]);
                         }
                     }
 
