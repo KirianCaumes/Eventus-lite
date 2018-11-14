@@ -49,14 +49,10 @@ class Finder {
                     return json_encode(["error"=> "Can't find match informations"]);
                 } else {
                     $allMatches = [];
-                    $teamInfos = [   
-                        //TODO optimize ?
-                        "championship" => 
-                            $html->find('div.sup h2 span', 0) ? $this->getCleanString($this->stripAccents($html->find('div.sup h2 span', 0)->plaintext)) : 'null'
-                        ];
+                    $teamInfos = [];   
                     foreach($html->find('div.round tr') as $row) {
                         if ( strpos( strtolower($row), strtolower($string) ) ){
-                            array_push($teamInfos, [
+                            $teamInfos = [
                                 "team" => 
                                     $this->getCleanString($row->find('td.eq',0)->plaintext),      
                                 "position" => 
@@ -79,9 +75,11 @@ class Finder {
                                     "goalDifference" => 
                                         intval($row->find('td',9)->plaintext)
                                 ]                               
-                            ]);
+                            ];
                         }
                     }
+                    //TODO : opti ?
+                    $teamInfos["championship"] = $html->find('div.sup h2 span', 0) ? $this->getCleanString($this->stripAccents($html->find('div.sup h2 span', 0)->plaintext)) : 'null';
 
                     foreach($html->getElementById('ul#journeelist')->find('.touchcarousel-item') as $matchDay => $rows) {
                         $clubFound = false;
@@ -187,7 +185,7 @@ class Finder {
         if ($myString[0] == " "){
             $myString = substr($myString, 1);
         }
-        return mb_convert_case(mb_strtolower(iconv("UTF-8", "ISO-8859-1//TRANSLIT", $myString)), MB_CASE_TITLE, "UTF-8");
+        return mb_convert_case(mb_strtolower(iconv("UTF-8", "ISO-8859-1//IGNORE", $myString)), MB_CASE_TITLE, "UTF-8");
     }
 }
 ?>
